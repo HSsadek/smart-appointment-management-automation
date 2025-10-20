@@ -30,9 +30,9 @@
         {
             components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
-            DevExpress.XtraScheduler.TimeRuler timeRuler1 = new DevExpress.XtraScheduler.TimeRuler();
-            DevExpress.XtraScheduler.TimeRuler timeRuler2 = new DevExpress.XtraScheduler.TimeRuler();
-            DevExpress.XtraScheduler.TimeRuler timeRuler3 = new DevExpress.XtraScheduler.TimeRuler();
+            DevExpress.XtraScheduler.TimeRuler timeRuler4 = new DevExpress.XtraScheduler.TimeRuler();
+            DevExpress.XtraScheduler.TimeRuler timeRuler5 = new DevExpress.XtraScheduler.TimeRuler();
+            DevExpress.XtraScheduler.TimeRuler timeRuler6 = new DevExpress.XtraScheduler.TimeRuler();
             splitContainerControl = new DevExpress.XtraEditors.SplitContainerControl();
             navBarControl = new DevExpress.XtraNavBar.NavBarControl();
             mailGroup = new DevExpress.XtraNavBar.NavBarGroup();
@@ -46,9 +46,7 @@
             navbarImageCollectionLarge = new DevExpress.Utils.ImageCollection(components);
             navbarImageCollection = new DevExpress.Utils.ImageCollection(components);
             schedulerSplitContainerControl = new DevExpress.XtraEditors.SplitContainerControl();
-            schedulerControl = new DevExpress.XtraScheduler.SchedulerControl();
-            schedulerStorage = new DevExpress.XtraScheduler.SchedulerDataStorage(components);
-            dateNavigator = new DevExpress.XtraScheduler.DateNavigator();
+            panelContent = new DevExpress.XtraBars.PopupControlContainer(components);
             ribbonControl = new DevExpress.XtraBars.Ribbon.RibbonControl();
             appMenu = new DevExpress.XtraBars.Ribbon.ApplicationMenu(components);
             popupControlContainer2 = new DevExpress.XtraBars.PopupControlContainer(components);
@@ -108,12 +106,14 @@
             printPreviewItem1 = new DevExpress.XtraScheduler.UI.PrintPreviewItem();
             printItem1 = new DevExpress.XtraScheduler.UI.PrintItem();
             printPageSetupItem1 = new DevExpress.XtraScheduler.UI.PrintPageSetupItem();
-            barButtonItem6 = new DevExpress.XtraBars.BarButtonItem();
+            btnProfil = new DevExpress.XtraBars.BarButtonItem();
             barButtonItem7 = new DevExpress.XtraBars.BarButtonItem();
             barButtonItem8 = new DevExpress.XtraBars.BarButtonItem();
             barButtonItem9 = new DevExpress.XtraBars.BarButtonItem();
             ribbonImageCollectionLarge = new DevExpress.Utils.ImageCollection(components);
             calendarToolsRibbonPageCategory1 = new DevExpress.XtraScheduler.UI.CalendarToolsRibbonPageCategory();
+            schedulerControl = new DevExpress.XtraScheduler.SchedulerControl();
+            schedulerStorage = new DevExpress.XtraScheduler.SchedulerDataStorage(components);
             appointmentRibbonPage1 = new DevExpress.XtraScheduler.UI.AppointmentRibbonPage();
             actionsRibbonPageGroup1 = new DevExpress.XtraScheduler.UI.ActionsRibbonPageGroup();
             optionsRibbonPageGroup1 = new DevExpress.XtraScheduler.UI.OptionsRibbonPageGroup();
@@ -136,6 +136,7 @@
             helpRibbonPage = new DevExpress.XtraBars.Ribbon.RibbonPage();
             helpRibbonPageGroup = new DevExpress.XtraBars.Ribbon.RibbonPageGroup();
             ribbonStatusBar = new DevExpress.XtraBars.Ribbon.RibbonStatusBar();
+            dateNavigator = new DevExpress.XtraScheduler.DateNavigator();
             schedulerBarController1 = new DevExpress.XtraScheduler.UI.SchedulerBarController(components);
             barButtonItem1 = new DevExpress.XtraBars.BarButtonItem();
             barButtonItem2 = new DevExpress.XtraBars.BarButtonItem();
@@ -157,10 +158,7 @@
             ((System.ComponentModel.ISupportInitialize)schedulerSplitContainerControl.Panel2).BeginInit();
             schedulerSplitContainerControl.Panel2.SuspendLayout();
             schedulerSplitContainerControl.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)schedulerControl).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)schedulerStorage).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)dateNavigator).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)dateNavigator.CalendarTimeProperties).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)panelContent).BeginInit();
             ((System.ComponentModel.ISupportInitialize)ribbonControl).BeginInit();
             ((System.ComponentModel.ISupportInitialize)appMenu).BeginInit();
             ((System.ComponentModel.ISupportInitialize)popupControlContainer2).BeginInit();
@@ -172,6 +170,10 @@
             ((System.ComponentModel.ISupportInitialize)repositoryItemDuration1).BeginInit();
             ((System.ComponentModel.ISupportInitialize)repositoryItemSpinEdit1).BeginInit();
             ((System.ComponentModel.ISupportInitialize)ribbonImageCollectionLarge).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)schedulerControl).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)schedulerStorage).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)dateNavigator).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)dateNavigator.CalendarTimeProperties).BeginInit();
             ((System.ComponentModel.ISupportInitialize)schedulerBarController1).BeginInit();
             SuspendLayout();
             // 
@@ -192,7 +194,7 @@
             splitContainerControl.Panel2.Controls.Add(schedulerSplitContainerControl);
             splitContainerControl.Panel2.Text = "Panel2";
             splitContainerControl.Size = new System.Drawing.Size(1100, 499);
-            splitContainerControl.SplitterPosition = 165;
+            splitContainerControl.SplitterPosition = 152;
             splitContainerControl.TabIndex = 0;
             splitContainerControl.Text = "splitContainerControl1";
             // 
@@ -205,9 +207,9 @@
             navBarControl.LargeImages = navbarImageCollectionLarge;
             navBarControl.Location = new System.Drawing.Point(0, 0);
             navBarControl.Name = "navBarControl";
-            navBarControl.OptionsNavPane.ExpandedWidth = 165;
+            navBarControl.OptionsNavPane.ExpandedWidth = 152;
             navBarControl.PaintStyleKind = DevExpress.XtraNavBar.NavBarViewKind.NavigationPane;
-            navBarControl.Size = new System.Drawing.Size(165, 487);
+            navBarControl.Size = new System.Drawing.Size(152, 487);
             navBarControl.SmallImages = navbarImageCollection;
             navBarControl.StoreDefaultPaintStyleName = true;
             navBarControl.TabIndex = 1;
@@ -293,64 +295,29 @@
             // schedulerSplitContainerControl.Panel1
             // 
             schedulerSplitContainerControl.Panel1.Controls.Add(schedulerControl);
+            schedulerSplitContainerControl.Panel1.Controls.Add(panelContent);
             schedulerSplitContainerControl.Panel1.Text = "Panel1";
             // 
             // schedulerSplitContainerControl.Panel2
             // 
             schedulerSplitContainerControl.Panel2.Controls.Add(dateNavigator);
             schedulerSplitContainerControl.Panel2.Text = "Panel2";
-            schedulerSplitContainerControl.Size = new System.Drawing.Size(913, 487);
-            schedulerSplitContainerControl.SplitterPosition = 218;
+            schedulerSplitContainerControl.Size = new System.Drawing.Size(926, 487);
+            schedulerSplitContainerControl.SplitterPosition = 215;
             schedulerSplitContainerControl.TabIndex = 2;
             schedulerSplitContainerControl.Text = "splitContainerControl1";
             // 
-            // schedulerControl
+            // panelContent
             // 
-            schedulerControl.DataStorage = schedulerStorage;
-            schedulerControl.Dock = System.Windows.Forms.DockStyle.Fill;
-            schedulerControl.Location = new System.Drawing.Point(0, 0);
-            schedulerControl.Name = "schedulerControl";
-            schedulerControl.Size = new System.Drawing.Size(685, 487);
-            schedulerControl.Start = new System.DateTime(2025, 10, 13, 0, 0, 0, 0);
-            schedulerControl.TabIndex = 0;
-            schedulerControl.Text = "schedulerControl1";
-            schedulerControl.Views.DayView.TimeRulers.Add(timeRuler1);
-            schedulerControl.Views.FullWeekView.Enabled = true;
-            schedulerControl.Views.FullWeekView.TimeRulers.Add(timeRuler2);
-            schedulerControl.Views.WeekView.Enabled = false;
-            schedulerControl.Views.WorkWeekView.TimeRulers.Add(timeRuler3);
-            schedulerControl.Views.YearView.UseOptimizedScrolling = false;
-            schedulerControl.EditAppointmentFormShowing += schedulerControl_EditAppointmentFormShowing;
-            // 
-            // schedulerStorage
-            // 
-            // 
-            // 
-            // 
-            schedulerStorage.Appointments.Labels.CreateNewLabel(0, "None", "&None", System.Drawing.SystemColors.Window);
-            schedulerStorage.Appointments.Labels.CreateNewLabel(1, "Important", "&Important", System.Drawing.Color.FromArgb(255, 194, 190));
-            schedulerStorage.Appointments.Labels.CreateNewLabel(2, "Business", "&Business", System.Drawing.Color.FromArgb(168, 213, 255));
-            schedulerStorage.Appointments.Labels.CreateNewLabel(3, "Personal", "&Personal", System.Drawing.Color.FromArgb(193, 244, 156));
-            schedulerStorage.Appointments.Labels.CreateNewLabel(4, "Vacation", "&Vacation", System.Drawing.Color.FromArgb(243, 228, 199));
-            schedulerStorage.Appointments.Labels.CreateNewLabel(5, "Must Attend", "Must &Attend", System.Drawing.Color.FromArgb(244, 206, 147));
-            schedulerStorage.Appointments.Labels.CreateNewLabel(6, "Travel Required", "&Travel Required", System.Drawing.Color.FromArgb(199, 244, 255));
-            schedulerStorage.Appointments.Labels.CreateNewLabel(7, "Needs Preparation", "&Needs Preparation", System.Drawing.Color.FromArgb(207, 219, 152));
-            schedulerStorage.Appointments.Labels.CreateNewLabel(8, "Birthday", "&Birthday", System.Drawing.Color.FromArgb(224, 207, 233));
-            schedulerStorage.Appointments.Labels.CreateNewLabel(9, "Anniversary", "&Anniversary", System.Drawing.Color.FromArgb(141, 233, 223));
-            schedulerStorage.Appointments.Labels.CreateNewLabel(10, "Phone Call", "Phone &Call", System.Drawing.Color.FromArgb(255, 247, 165));
-            // 
-            // dateNavigator
-            // 
-            dateNavigator.CalendarTimeProperties.Buttons.AddRange(new DevExpress.XtraEditors.Controls.EditorButton[] { new DevExpress.XtraEditors.Controls.EditorButton(DevExpress.XtraEditors.Controls.ButtonPredefines.Combo) });
-            dateNavigator.DateTime = new System.DateTime(2025, 10, 13, 0, 0, 0, 0);
-            dateNavigator.Dock = System.Windows.Forms.DockStyle.Fill;
-            dateNavigator.EditValue = new System.DateTime(2025, 10, 13, 0, 0, 0, 0);
-            dateNavigator.FirstDayOfWeek = System.DayOfWeek.Monday;
-            dateNavigator.Location = new System.Drawing.Point(0, 0);
-            dateNavigator.Name = "dateNavigator";
-            dateNavigator.SchedulerControl = schedulerControl;
-            dateNavigator.Size = new System.Drawing.Size(218, 487);
-            dateNavigator.TabIndex = 1;
+            panelContent.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            panelContent.BorderStyle = DevExpress.XtraEditors.Controls.BorderStyles.NoBorder;
+            panelContent.Dock = System.Windows.Forms.DockStyle.Fill;
+            panelContent.Location = new System.Drawing.Point(0, 0);
+            panelContent.Name = "panelContent";
+            panelContent.Ribbon = ribbonControl;
+            panelContent.Size = new System.Drawing.Size(701, 487);
+            panelContent.TabIndex = 6;
+            panelContent.Visible = false;
             // 
             // ribbonControl
             // 
@@ -358,7 +325,7 @@
             ribbonControl.ApplicationButtonText = null;
             ribbonControl.ExpandCollapseItem.Id = 0;
             ribbonControl.Images = ribbonImageCollection;
-            ribbonControl.Items.AddRange(new DevExpress.XtraBars.BarItem[] { ribbonControl.ExpandCollapseItem, iExit, iHelp, iAbout, siStatus, siInfo, rgbiPalettes, ddbiSkins, editAppointmentQueryItem1, editOccurrenceUICommandItem1, editSeriesUICommandItem1, deleteAppointmentsItem1, deleteOccurrenceItem1, deleteSeriesItem1, splitAppointmentItem1, changeAppointmentStatusItem1, changeAppointmentLabelItem1, toggleRecurrenceItem1, changeAppointmentReminderItem1, switchToDayViewItem1, switchToWorkWeekViewItem1, switchToWeekViewItem1, switchToFullWeekViewItem1, switchToMonthViewItem1, switchToTimelineViewItem1, switchToGanttViewItem1, switchToAgendaViewItem1, switchToYearViewItem1, switchTimeScalesItem1, changeScaleWidthItem1, switchTimeScalesCaptionItem1, switchCompressWeekendItem1, switchShowWorkTimeOnlyItem1, switchCellsAutoHeightItem1, changeSnapToCellsUIItem1, newAppointmentItem1, newRecurringAppointmentItem1, navigateViewBackwardItem1, navigateViewForwardItem1, gotoTodayItem1, viewZoomInItem1, viewZoomOutItem1, groupByNoneItem1, groupByDateItem1, groupByResourceItem1, openScheduleItem1, saveScheduleItem1, printPreviewItem1, printItem1, printPageSetupItem1, barButtonItem6, barButtonItem7, barButtonItem8, barButtonItem9 });
+            ribbonControl.Items.AddRange(new DevExpress.XtraBars.BarItem[] { ribbonControl.ExpandCollapseItem, iExit, iHelp, iAbout, siStatus, siInfo, rgbiPalettes, ddbiSkins, editAppointmentQueryItem1, editOccurrenceUICommandItem1, editSeriesUICommandItem1, deleteAppointmentsItem1, deleteOccurrenceItem1, deleteSeriesItem1, splitAppointmentItem1, changeAppointmentStatusItem1, changeAppointmentLabelItem1, toggleRecurrenceItem1, changeAppointmentReminderItem1, switchToDayViewItem1, switchToWorkWeekViewItem1, switchToWeekViewItem1, switchToFullWeekViewItem1, switchToMonthViewItem1, switchToTimelineViewItem1, switchToGanttViewItem1, switchToAgendaViewItem1, switchToYearViewItem1, switchTimeScalesItem1, changeScaleWidthItem1, switchTimeScalesCaptionItem1, switchCompressWeekendItem1, switchShowWorkTimeOnlyItem1, switchCellsAutoHeightItem1, changeSnapToCellsUIItem1, newAppointmentItem1, newRecurringAppointmentItem1, navigateViewBackwardItem1, navigateViewForwardItem1, gotoTodayItem1, viewZoomInItem1, viewZoomOutItem1, groupByNoneItem1, groupByDateItem1, groupByResourceItem1, openScheduleItem1, saveScheduleItem1, printPreviewItem1, printItem1, printPageSetupItem1, btnProfil, barButtonItem7, barButtonItem8, barButtonItem9 });
             ribbonControl.LargeImages = ribbonImageCollectionLarge;
             ribbonControl.Location = new System.Drawing.Point(0, 0);
             ribbonControl.MaxItemId = 110;
@@ -657,7 +624,6 @@
             // 
             newAppointmentItem1.Id = 89;
             newAppointmentItem1.Name = "newAppointmentItem1";
-            newAppointmentItem1.ItemClick += newAppointmentItem1_ItemClick;
             // 
             // newRecurringAppointmentItem1
             // 
@@ -729,12 +695,13 @@
             printPageSetupItem1.Id = 103;
             printPageSetupItem1.Name = "printPageSetupItem1";
             // 
-            // barButtonItem6
+            // btnProfil
             // 
-            barButtonItem6.Caption = "Profile";
-            barButtonItem6.Id = 105;
-            barButtonItem6.ImageOptions.SvgImage = (DevExpress.Utils.Svg.SvgImage)resources.GetObject("barButtonItem6.ImageOptions.SvgImage");
-            barButtonItem6.Name = "barButtonItem6";
+            btnProfil.Caption = "Profile";
+            btnProfil.Id = 105;
+            btnProfil.ImageOptions.SvgImage = (DevExpress.Utils.Svg.SvgImage)resources.GetObject("btnProfil.ImageOptions.SvgImage");
+            btnProfil.Name = "btnProfil";
+            btnProfil.ItemClick += btnProfil_ItemClick_1;
             // 
             // barButtonItem7
             // 
@@ -771,6 +738,41 @@
             calendarToolsRibbonPageCategory1.Name = "calendarToolsRibbonPageCategory1";
             calendarToolsRibbonPageCategory1.Pages.AddRange(new DevExpress.XtraBars.Ribbon.RibbonPage[] { appointmentRibbonPage1 });
             calendarToolsRibbonPageCategory1.Visible = false;
+            // 
+            // schedulerControl
+            // 
+            schedulerControl.DataStorage = schedulerStorage;
+            schedulerControl.Dock = System.Windows.Forms.DockStyle.Fill;
+            schedulerControl.Location = new System.Drawing.Point(0, 0);
+            schedulerControl.Name = "schedulerControl";
+            schedulerControl.Size = new System.Drawing.Size(701, 487);
+            schedulerControl.Start = new System.DateTime(2025, 10, 13, 0, 0, 0, 0);
+            schedulerControl.TabIndex = 0;
+            schedulerControl.Text = "schedulerControl1";
+            schedulerControl.Views.DayView.TimeRulers.Add(timeRuler4);
+            schedulerControl.Views.FullWeekView.Enabled = true;
+            schedulerControl.Views.FullWeekView.TimeRulers.Add(timeRuler5);
+            schedulerControl.Views.WeekView.Enabled = false;
+            schedulerControl.Views.WorkWeekView.TimeRulers.Add(timeRuler6);
+            schedulerControl.Views.YearView.UseOptimizedScrolling = false;
+            schedulerControl.EditAppointmentFormShowing += schedulerControl_EditAppointmentFormShowing;
+            // 
+            // schedulerStorage
+            // 
+            // 
+            // 
+            // 
+            schedulerStorage.Appointments.Labels.CreateNewLabel(0, "None", "&None", System.Drawing.SystemColors.Window);
+            schedulerStorage.Appointments.Labels.CreateNewLabel(1, "Important", "&Important", System.Drawing.Color.FromArgb(255, 194, 190));
+            schedulerStorage.Appointments.Labels.CreateNewLabel(2, "Business", "&Business", System.Drawing.Color.FromArgb(168, 213, 255));
+            schedulerStorage.Appointments.Labels.CreateNewLabel(3, "Personal", "&Personal", System.Drawing.Color.FromArgb(193, 244, 156));
+            schedulerStorage.Appointments.Labels.CreateNewLabel(4, "Vacation", "&Vacation", System.Drawing.Color.FromArgb(243, 228, 199));
+            schedulerStorage.Appointments.Labels.CreateNewLabel(5, "Must Attend", "Must &Attend", System.Drawing.Color.FromArgb(244, 206, 147));
+            schedulerStorage.Appointments.Labels.CreateNewLabel(6, "Travel Required", "&Travel Required", System.Drawing.Color.FromArgb(199, 244, 255));
+            schedulerStorage.Appointments.Labels.CreateNewLabel(7, "Needs Preparation", "&Needs Preparation", System.Drawing.Color.FromArgb(207, 219, 152));
+            schedulerStorage.Appointments.Labels.CreateNewLabel(8, "Birthday", "&Birthday", System.Drawing.Color.FromArgb(224, 207, 233));
+            schedulerStorage.Appointments.Labels.CreateNewLabel(9, "Anniversary", "&Anniversary", System.Drawing.Color.FromArgb(141, 233, 223));
+            schedulerStorage.Appointments.Labels.CreateNewLabel(10, "Phone Call", "Phone &Call", System.Drawing.Color.FromArgb(255, 247, 165));
             // 
             // appointmentRibbonPage1
             // 
@@ -922,7 +924,7 @@
             // 
             // ribbonPageGroup1
             // 
-            ribbonPageGroup1.ItemLinks.Add(barButtonItem6);
+            ribbonPageGroup1.ItemLinks.Add(btnProfil);
             ribbonPageGroup1.ItemLinks.Add(barButtonItem7);
             ribbonPageGroup1.ItemLinks.Add(barButtonItem8);
             ribbonPageGroup1.ItemLinks.Add(barButtonItem9);
@@ -951,6 +953,19 @@
             ribbonStatusBar.Name = "ribbonStatusBar";
             ribbonStatusBar.Ribbon = ribbonControl;
             ribbonStatusBar.Size = new System.Drawing.Size(1100, 24);
+            // 
+            // dateNavigator
+            // 
+            dateNavigator.CalendarTimeProperties.Buttons.AddRange(new DevExpress.XtraEditors.Controls.EditorButton[] { new DevExpress.XtraEditors.Controls.EditorButton(DevExpress.XtraEditors.Controls.ButtonPredefines.Combo) });
+            dateNavigator.DateTime = new System.DateTime(2025, 10, 13, 0, 0, 0, 0);
+            dateNavigator.Dock = System.Windows.Forms.DockStyle.Fill;
+            dateNavigator.EditValue = new System.DateTime(2025, 10, 13, 0, 0, 0, 0);
+            dateNavigator.FirstDayOfWeek = System.DayOfWeek.Monday;
+            dateNavigator.Location = new System.Drawing.Point(0, 0);
+            dateNavigator.Name = "dateNavigator";
+            dateNavigator.SchedulerControl = schedulerControl;
+            dateNavigator.Size = new System.Drawing.Size(215, 487);
+            dateNavigator.TabIndex = 1;
             // 
             // schedulerBarController1
             // 
@@ -1079,10 +1094,7 @@
             schedulerSplitContainerControl.Panel2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)schedulerSplitContainerControl).EndInit();
             schedulerSplitContainerControl.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)schedulerControl).EndInit();
-            ((System.ComponentModel.ISupportInitialize)schedulerStorage).EndInit();
-            ((System.ComponentModel.ISupportInitialize)dateNavigator.CalendarTimeProperties).EndInit();
-            ((System.ComponentModel.ISupportInitialize)dateNavigator).EndInit();
+            ((System.ComponentModel.ISupportInitialize)panelContent).EndInit();
             ((System.ComponentModel.ISupportInitialize)ribbonControl).EndInit();
             ((System.ComponentModel.ISupportInitialize)appMenu).EndInit();
             ((System.ComponentModel.ISupportInitialize)popupControlContainer2).EndInit();
@@ -1095,6 +1107,10 @@
             ((System.ComponentModel.ISupportInitialize)repositoryItemDuration1).EndInit();
             ((System.ComponentModel.ISupportInitialize)repositoryItemSpinEdit1).EndInit();
             ((System.ComponentModel.ISupportInitialize)ribbonImageCollectionLarge).EndInit();
+            ((System.ComponentModel.ISupportInitialize)schedulerControl).EndInit();
+            ((System.ComponentModel.ISupportInitialize)schedulerStorage).EndInit();
+            ((System.ComponentModel.ISupportInitialize)dateNavigator.CalendarTimeProperties).EndInit();
+            ((System.ComponentModel.ISupportInitialize)dateNavigator).EndInit();
             ((System.ComponentModel.ISupportInitialize)schedulerBarController1).EndInit();
             ResumeLayout(false);
             PerformLayout();
@@ -1203,7 +1219,7 @@
         private DevExpress.XtraScheduler.UI.SchedulerBarController schedulerBarController1;
         private DevExpress.XtraBars.Ribbon.RibbonPage ribbonPage1;
         private DevExpress.XtraBars.Ribbon.RibbonPageGroup ribbonPageGroup1;
-        private DevExpress.XtraBars.BarButtonItem barButtonItem6;
+        private DevExpress.XtraBars.BarButtonItem btnProfil;
         private DevExpress.XtraBars.BarButtonItem barButtonItem1;
         private DevExpress.XtraBars.BarButtonItem barButtonItem2;
         private DevExpress.XtraBars.BarButtonItem barButtonItem3;
@@ -1212,5 +1228,6 @@
         private DevExpress.XtraBars.BarButtonItem barButtonItem7;
         private DevExpress.XtraBars.BarButtonItem barButtonItem8;
         private DevExpress.XtraBars.BarButtonItem barButtonItem9;
+        private DevExpress.XtraBars.PopupControlContainer panelContent;
     }
 }

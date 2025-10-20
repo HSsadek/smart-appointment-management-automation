@@ -7,6 +7,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <EmbeddedResource Remove="frmProfilDuzenleSon.resx" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="DevExpress.Win.Design" Version="25.1.5" />
     <PackageReference Include="DevExpress.Win.BonusSkins" Version="25.1.5" />
     <PackageReference Include="MySql.Data" Version="9.4.0" />

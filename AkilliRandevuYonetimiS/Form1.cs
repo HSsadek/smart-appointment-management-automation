@@ -1,17 +1,19 @@
 ﻿using System;
 using System.Data;
 using System.Windows.Forms;
+using DevExpress.XtraBars; // ItemClickEventArgs için
 using DevExpress.XtraBars.Ribbon;
 using DevExpress.XtraScheduler;
 using MySql.Data.MySqlClient;
 using DevExpress.Utils.Menu;
-using AkilliRandevuYonetimiS.Services;
+using DevExpress.XtraEditors; // PanelControl için
 
 namespace AkilliRandevuYonetimiS
 {
     public partial class Form1 : RibbonForm
     {
-        private Form activeInlineForm = null;
+        // Panel içinde hangi formun aktif olduğunu tutmak için (genel kullanım)
+        // private Form activeInlineForm = null; // Bu özel mekanizmaya artık ihtiyacımız yok gibi
 
         public Form1()
         {
@@ -20,75 +22,38 @@ namespace AkilliRandevuYonetimiS
             schedulerControl.Storage = new SchedulerStorage();
             this.schedulerControl.EditAppointmentFormShowing += schedulerControl_EditAppointmentFormShowing;
             this.schedulerControl.PopupMenuShowing += schedulerControl_PopupMenuShowing;
+
+            // Wire personel button click (Dashboard -> Personel / barButtonItem7)
+            try
+            {
+                this.barButtonItem7.ItemClick += barButtonItem7_ItemClick;
+            }
+            catch { /* ignore if designer name differs */ }
+
+            // Wire hizmetler button click (Dashboard -> Hizmetler / barButtonItem8)
+            try
+            {
+                this.barButtonItem8.ItemClick += barButtonItem8_ItemClick;
+            }
+            catch { /* ignore if designer name differs */ }
+
+            // Profil butonunun olayını bağlıyoruz (Tasarımcıda çift tıkladıysanız bu satıra gerek yok)
+            // Eğer tasarımcıda btnProfil_ItemClick metodu otomatik oluştuysa bu satırı silebilirsiniz.
+            // Aksi takdirde bırakın veya tasarımcıdan bağlayın.
+            // this.btnProfil.ItemClick += btnProfil_ItemClick; // İsmin btnProfil olduğundan emin olun
+
             schedulerControl.Start = System.DateTime.Now;
             RandevulariYukle();
-
-            // wire the profile button (barButtonItem6)
-            try { barButtonItem6.ItemClick -= BarButtonItem6_ItemClick; } catch { }
-            barButtonItem6.ItemClick += BarButtonItem6_ItemClick;
         }
 
-        private void BarButtonItem6_ItemClick(object sender, DevExpress.XtraBars.ItemClickEventArgs e)
-        {
-            // Toggle inline profile view in place of schedulerControl
-            if (activeInlineForm == null)
-                ShowProfileInline();
-            else
-                CloseInlineForm();
-        }
-
-        private void ShowProfileInline()
-        {
-            try
-            {
-                // hide scheduler control (keep it in controls to restore later)
-                schedulerControl.Visible = false;
-
-                // create profile form and host it inside the panel
-                var frm = new frmProfilDuzenle();
-                activeInlineForm = frm;
-                frm.TopLevel = false;
-                frm.FormBorderStyle = FormBorderStyle.None;
-                frm.Dock = DockStyle.Fill;
-
-                // Add to the panel that currently hosts schedulerControl
-                schedulerSplitContainerControl.Panel1.Controls.Add(frm);
-                frm.Show();
-
-                // Optionally refresh layout
-                schedulerSplitContainerControl.Panel1.Refresh();
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Profil görünümü açılamadı: " + ex.Message, "Hata", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                // restore schedulerControl visibility
-                schedulerControl.Visible = true;
-            }
-        }
-
-        private void CloseInlineForm()
-        {
-            try
-            {
-                if (activeInlineForm != null)
-                {
-                    schedulerSplitContainerControl.Panel1.Controls.Remove(activeInlineForm);
-                    activeInlineForm.Dispose();
-                    activeInlineForm = null;
-                }
-            }
-            catch { }
-            finally
-            {
-                schedulerControl.Visible = true;
-            }
-        }
-
+        // ===========================================================================
+        //  VERİTABANINDAN RANDEVULARI YÜKLEME METODU (Değişiklik yok)
+        // ===========================================================================
         void RandevulariYukle()
         {
             string sorgu = @"
-                SELECT 
-                    R.*, 
+                SELECT
+                    R.*,
                     CONCAT(M.Ad, ' ', M.Soyad, ' - ', H.HizmetAdi) AS RandevuKonusu,
                     CASE R.Durum
                         WHEN 'Tamamlandı' THEN 3
@@ -119,24 +84,16 @@ namespace AkilliRandevuYonetimiS
             }
         }
 
-        // === EN ÖNEMLİ DEĞİŞİKLİK BURADA: YANKI ETKİSİNİ ÖNLEME ===
+        // ===========================================================================
+        //  YENİ RANDEVU EKLEME / DÜZENLEME FORMU GÖSTERME OLAYI (Değişiklik yok)
+        // ===========================================================================
         private void schedulerControl_EditAppointmentFormShowing(object sender, AppointmentFormEventArgs e)
         {
-            // DevExpress'in kendi formunu açmasını hemen engelliyoruz.
             e.Handled = true;
-
-            // Formu açma ve yenileme işlemini, mevcut olay döngüsü bittikten sonra yapması için zamanlıyoruz.
-            // Bu, "yankı" etkisini ve formun iki kez açılmasını kesin olarak engeller.
             this.BeginInvoke(new Action(() =>
             {
-
-                // Kendi özel formumuzu, tıklanan randevu bilgisiyle birlikte açıyoruz.
                 frmYeniRandevu randevuFormu = new frmYeniRandevu(e.Appointment, schedulerControl);
-
-                // Formu aç ve kapanırken gönderdiği sonucu yakala.
                 DialogResult sonuc = randevuFormu.ShowDialog();
-
-                // SADECE ve SADECE sonuç "OK" ise (yani Kaydet'e basıldıysa) takvimi yenile.
                 if (sonuc == DialogResult.OK)
                 {
                     RandevulariYukle();
@@ -144,6 +101,9 @@ namespace AkilliRandevuYonetimiS
             }));
         }
 
+        // ===========================================================================
+        //  SAĞ TIK MENÜSÜ OLAYI (Değişiklik yok)
+        // ===========================================================================
         private void schedulerControl_PopupMenuShowing(object sender, PopupMenuShowingEventArgs e)
         {
             if (e.Menu.Id == SchedulerMenuItemId.AppointmentMenu)
@@ -215,6 +175,9 @@ namespace AkilliRandevuYonetimiS
             }
         }
 
+        // ===========================================================================
+        //  RANDEVU DURUMUNU GÜNCELLEME METODU (Değişiklik yok)
+        // ===========================================================================
         void RandevuDurumunuGuncelle(int randevuID, string yeniDurum)
         {
             MySqlConnection baglanti = VeritabaniBaglantisi.Baglan();
@@ -238,9 +201,85 @@ namespace AkilliRandevuYonetimiS
             }
         }
 
-        private void newAppointmentItem1_ItemClick(object sender, DevExpress.XtraBars.ItemClickEventArgs e)
+        // ===========================================================================
+        //  PROFİL BUTONUNA TIKLANDIĞINDA ÇALIŞACAK YENİ KOD
+        // ===========================================================================
+
+        private void btnProfil_ItemClick_1(object sender, ItemClickEventArgs e)
         {
+            // 1. Hedef Konteyner: SplitContainer'ın takvimi içeren paneli (Genellikle Panel1)
+            var targetPanel = schedulerSplitContainerControl.Panel1;
+
+            // 2. Panelin içini temizle (varsa eski formu kaldırır)
+            targetPanel.Controls.Clear();
+
+            // 3. Profil formunu oluştur ve ayarla
+            frmProfilDuzenle profilForm = new frmProfilDuzenle();
+            profilForm.TopLevel = false;
+            profilForm.FormBorderStyle = FormBorderStyle.None;
+            profilForm.Dock = DockStyle.Fill; // Panelin içini tamamen dolduracak
+
+            // 4. Formu doğru panele ekle
+            targetPanel.Controls.Add(profilForm);
+
+            // 5. Formu göster
+            profilForm.Visible = true; // VEYA profilForm.Show();
+
+            // 6. Takvimi gizle (Panel zaten görünür)
+            schedulerControl.Visible = false;
+
+            // panelContent'e artık ihtiyacımız yok, bu yüzden onunla ilgili kodları sildik.
 
         }
-    }
+
+        // New handler: show personnel management form
+        private void barButtonItem7_ItemClick(object sender, ItemClickEventArgs e)
+        {
+            var targetPanel = schedulerSplitContainerControl.Panel1;
+            targetPanel.Controls.Clear();
+
+            var personelForm = new frmPersonel();
+            personelForm.TopLevel = false;
+            personelForm.FormBorderStyle = FormBorderStyle.None;
+            personelForm.Dock = DockStyle.Fill;
+
+            targetPanel.Controls.Add(personelForm);
+            personelForm.Show();
+
+            // Hide scheduler
+            schedulerControl.Visible = false;
+        }
+
+        // New handler: show services management form
+        private void barButtonItem8_ItemClick(object sender, ItemClickEventArgs e)
+        {
+            var targetPanel = schedulerSplitContainerControl.Panel1;
+            targetPanel.Controls.Clear();
+
+            var hizmetForm = new frmHizmet();
+            hizmetForm.TopLevel = false;
+            hizmetForm.FormBorderStyle = FormBorderStyle.None;
+            hizmetForm.Dock = DockStyle.Fill;
+
+            targetPanel.Controls.Add(hizmetForm);
+            hizmetForm.Show();
+
+            // Hide scheduler
+            schedulerControl.Visible = false;
+        }
+
+        // ===========================================================================
+        //  TAKVMİ GÖSTERMEK İÇİN GENEL (PUBLIC) METOD
+        // ===========================================================================
+        public void TakvimiGoster()
+            {
+            // Profil panelini gizle
+            panelContent.Visible = false; // panelContent adının doğru olduğundan emin olun
+            panelContent.Controls.Clear(); // İçini temizlemek iyi bir pratik
+
+            // Takvimi göster
+            schedulerControl.Visible = true;
+            schedulerControl.BringToFront(); // Her ihtimale karşı öne getir
+        } 
+    } 
 }

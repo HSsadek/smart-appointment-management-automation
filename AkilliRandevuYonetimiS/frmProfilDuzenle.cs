@@ -1,336 +1,227 @@
-using System;
+﻿using System;
 using System.Drawing;
-using System.Drawing.Drawing2D;
 using System.IO;
 using System.Windows.Forms;
-using AkilliRandevuYonetimiS.Services;
 using MySql.Data.MySqlClient;
-using System.Data; // DataTable ve CommandBehavior için
-using System.Configuration; // Gerekirse (ProfileService'de yoksa)
-using System.Drawing.Imaging;
-using System.Linq;
 
 namespace AkilliRandevuYonetimiS
 {
     public partial class frmProfilDuzenle : Form
     {
-        private readonly ProfileService _service = new ProfileService();
-        private int currentUserId = SessionManager.UserId ?? 0;
+        private string currentImagePath;
 
         public frmProfilDuzenle()
         {
             InitializeComponent();
+            SetupControls();
+            LoadUserData();
         }
 
-        private void frmProfilDuzenle_Load(object sender, EventArgs e)
+        private void SetupControls()
         {
-            // If SessionManager has user, prefer it
-            if (SessionManager.UserId.HasValue && SessionManager.UserId.Value > 0)
-            {
-                currentUserId = SessionManager.UserId.Value;
-            }
+            // Form ayarları
+            this.Text = "Profil Düzenle";
+            this.FormBorderStyle = FormBorderStyle.None;
 
-            // If we don't have an ID but SessionManager contains user info, populate from session as fallback
-            if (currentUserId == 0 && !string.IsNullOrWhiteSpace(SessionManager.Username))
-            {
-                txtUsername.Text = SessionManager.Username ?? string.Empty;
-                txtEmail.Text = SessionManager.Email ?? string.Empty;
-                txtRole.Text = SessionManager.Role ?? string.Empty;
-                txtFirstName.Text = SessionManager.FirstName ?? string.Empty;
-                txtLastName.Text = SessionManager.LastName ?? string.Empty;
-                if (SessionManager.AvatarBytes != null)
-                {
-                    try
-                    {
-                        using var ms = new MemoryStream(SessionManager.AvatarBytes);
-                        pictureBoxAvatar.Image = Image.FromStream(ms);
-                        MakeAvatarCircular();
-                    }
-                    catch { }
-                }
+            // Panel ayarları
+            mainPanel.Dock = DockStyle.Fill;
+            mainPanel.Padding = new Padding(20);
 
-                txtUsername.ReadOnly = true;
-                txtRole.ReadOnly = true;
-                return;
-            }
+            // PictureBox ayarları
+            pictureBoxProfil.SizeMode = PictureBoxSizeMode.Zoom;
+            pictureBoxProfil.BorderStyle = BorderStyle.FixedSingle;
 
-            MySqlConnection baglanti = VeritabaniBaglantisi.Baglan(); // Veritabanı bağlantı metodunuzu kullanın
+            // ComboBox ayarları
+            cmbRol.DropDownStyle = ComboBoxStyle.DropDownList;
+            cmbRol.Items.Clear();
+            cmbRol.Items.AddRange(new object[] { "Admin", "Kullanıcı" });
+
+            // Şifre alanı ayarları
+            txtSifre.UseSystemPasswordChar = true;
+
+            // Make controls responsive
+            txtKullaniciAdi.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            txtSifre.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            txtAdSoyad.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            txtEmail.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            cmbRol.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+
+            pictureBoxProfil.Anchor = AnchorStyles.Top | AnchorStyles.Left;
+            btnResimSec.Anchor = AnchorStyles.Top | AnchorStyles.Left;
+            btnKaydet.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+            btnIptal.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+
+            // Event handlers
+            btnResimSec.Click += BtnResimSec_Click;
+            btnKaydet.Click += BtnKaydet_Click;
+            btnIptal.Click += BtnIptal_Click;
+        }
+
+        private void LoadUserData()
+        {
             try
             {
-                baglanti.Open();
-                // Use the actual columns. The table contains KullaniciID, KullaniciAdi, Sifre, AdSoyad, Rol, Email, fotograf
-                string sorgu = "SELECT KullaniciID, KullaniciAdi, AdSoyad, Rol, Email, fotograf FROM Kullanicilar WHERE KullaniciID = @id LIMIT 1";
-                MySqlCommand cmd = new MySqlCommand(sorgu, baglanti);
-                cmd.Parameters.AddWithValue("@id", currentUserId);
-
-                using (MySqlDataReader reader = cmd.ExecuteReader(CommandBehavior.SingleRow)) // Sadece tek satır bekliyoruz
+                int? userId = SessionManager.UserId;
+                if (userId == null || userId == 0)
                 {
-                    if (reader.Read()) // Kullanıcı bulunduysa
+                    // Try username fallback
+                    if (!string.IsNullOrEmpty(SessionManager.Username))
                     {
-                        txtUsername.Text = reader["KullaniciAdi"]?.ToString();
-                        txtEmail.Text = reader["Email"]?.ToString();
-                        txtRole.Text = reader["Rol"]?.ToString();
-
-                        // AdSoyad sütununu ayırma
-                        string adSoyad = reader["AdSoyad"] != DBNull.Value ? reader["AdSoyad"].ToString() : string.Empty;
-                        if (!string.IsNullOrWhiteSpace(adSoyad))
-                        {
-                            int ilkBosluk = adSoyad.IndexOf(' ');
-                            if (ilkBosluk > 0)
-                            {
-                                txtFirstName.Text = adSoyad.Substring(0, ilkBosluk);
-                                txtLastName.Text = adSoyad.Substring(ilkBosluk + 1);
-                            }
-                            else
-                            {
-                                txtFirstName.Text = adSoyad;
-                                txtLastName.Text = "";
-                            }
-                        }
-
-                        // Avatar
-                        if (reader["fotograf"] != DBNull.Value)
-                        {
-                            try
-                            {
-                                byte[] avatarBytes = (byte[])reader["fotograf"];
-                                using (var ms = new MemoryStream(avatarBytes))
-                                {
-                                    pictureBoxAvatar.Image = Image.FromStream(ms);
-                                    MakeAvatarCircular();
-                                }
-                            }
-                            catch { }
-                        }
+                        using var conn = VeritabaniBaglantisi.Baglan();
+                        conn.Open();
+                        using var cmd1 = new MySqlCommand("SELECT KullaniciID FROM Kullanicilar WHERE KullaniciAdi=@u LIMIT 1", conn);
+                        cmd1.Parameters.AddWithValue("@u", SessionManager.Username);
+                        var idObj = cmd1.ExecuteScalar();
+                        if (idObj != null && idObj != DBNull.Value) userId = Convert.ToInt32(idObj);
                     }
-                    else
+                }
+
+                if (userId == null || userId == 0) return;
+
+                using var baglanti = VeritabaniBaglantisi.Baglan();
+                baglanti.Open();
+                string sorgu = "SELECT KullaniciAdi, Sifre, AdSoyad, Rol, Email, fotograf FROM Kullanicilar WHERE KullaniciID=@id LIMIT 1";
+                using var cmd = new MySqlCommand(sorgu, baglanti);
+                cmd.Parameters.AddWithValue("@id", userId.Value);
+                using var reader = cmd.ExecuteReader();
+                if (reader.Read())
+                {
+                    txtKullaniciAdi.Text = reader["KullaniciAdi"] != DBNull.Value ? reader["KullaniciAdi"].ToString() : string.Empty;
+                    txtSifre.Text = reader["Sifre"] != DBNull.Value ? reader["Sifre"].ToString() : string.Empty;
+                    txtAdSoyad.Text = reader["AdSoyad"] != DBNull.Value ? reader["AdSoyad"].ToString() : string.Empty;
+                    txtEmail.Text = reader["Email"] != DBNull.Value ? reader["Email"].ToString() : string.Empty;
+
+                    var rolVal = reader["Rol"] != DBNull.Value ? reader["Rol"].ToString() : string.Empty;
+                    if (!string.IsNullOrEmpty(rolVal) && cmbRol.Items.Contains(rolVal))
+                        cmbRol.SelectedItem = rolVal;
+                    else if (cmbRol.Items.Count > 0) cmbRol.SelectedIndex = 0;
+
+                    if (reader["fotograf"] != DBNull.Value)
                     {
-                        MessageBox.Show("Kullanıcı bilgileri yüklenemedi.", "Hata", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                        this.Close();
+                        try
+                        {
+                            var bytes = (byte[])reader["fotograf"];
+                            SessionManager.AvatarBytes = bytes;
+                            using var ms = new MemoryStream(bytes);
+                            pictureBoxProfil.Image = Image.FromStream(ms);
+                        }
+                        catch { SessionManager.AvatarBytes = null; }
                     }
+
+                    // Update session values
+                    SessionManager.UserId = userId;
+                    SessionManager.Username = txtKullaniciAdi.Text;
+                    SessionManager.Email = txtEmail.Text;
+                    SessionManager.Role = rolVal;
+                    SessionManager.DisplayName = txtAdSoyad.Text;
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Profil bilgileri yüklenirken hata: " + ex.Message, "Veritabanı Hatası", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                this.Close();
-            }
-            finally
-            {
-                baglanti.Close();
-            }
-
-            txtUsername.ReadOnly = true;
-            txtRole.ReadOnly = true;
-        }
-
-        private void panelCard_Paint(object sender, PaintEventArgs e)
-        {
-            using var p = new Pen(Color.FromArgb(235, 235, 240));
-            e.Graphics.DrawRectangle(p, 0, 0, panelCard.Width - 1, panelCard.Height - 1);
-        }
-
-        private void panelAvatarBorder_Paint(object sender, PaintEventArgs e)
-        {
-            // draw a subtle shadow and circular border
-            var rect = panelAvatarBorder.ClientRectangle;
-            using var shadowBrush = new SolidBrush(Color.FromArgb(30, 0, 0, 0));
-            var shadowRect = new Rectangle(rect.Left + 2, rect.Top + 2, rect.Width, rect.Height);
-            e.Graphics.FillEllipse(shadowBrush, shadowRect);
-            using var pen = new Pen(Color.FromArgb(220, 220, 230), 1.5f);
-            e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
-            e.Graphics.DrawEllipse(pen, rect.Left + 1, rect.Top + 1, rect.Width - 3, rect.Height - 3);
-        }
-
-        private void MakeAvatarCircular()
-        {
-            try
-            {
-                var w = pictureBoxAvatar.Width;
-                var h = pictureBoxAvatar.Height;
-                var gp = new GraphicsPath();
-                gp.AddEllipse(0, 0, w, h);
-                pictureBoxAvatar.Region?.Dispose();
-                pictureBoxAvatar.Region = new Region(gp);
-            }
-            catch { }
-        }
-
-        private void btnClose_Click(object sender, EventArgs e)
-        {
-            // If hosted inline, close and restore scheduler (Form1 handles visibility)
-            this.Parent?.Controls.Remove(this);
-            this.Dispose();
-        }
-
-        private void txtEmail_TextChanged(object sender, EventArgs e)
-        {
-            // simple inline validation
-            var email = txtEmail.Text?.Trim() ?? string.Empty;
-            if (string.IsNullOrWhiteSpace(email))
-            {
-                lblStatus.Text = "E-posta boş olamaz.";
-                lblStatus.Appearance.ForeColor = Color.FromArgb(200, 40, 40);
-            }
-            else if (!email.Contains("@") || email.Length < 5)
-            {
-                lblStatus.Text = "Geçersiz e-posta formatı.";
-                lblStatus.Appearance.ForeColor = Color.FromArgb(200, 100, 40);
-            }
-            else
-            {
-                lblStatus.Text = "";
+                MessageBox.Show("Profil yüklenirken hata oluştu: " + ex.Message, "Hata", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
-        private async void btnSave_Click(object sender, EventArgs e)
+        private void BtnResimSec_Click(object sender, EventArgs e)
         {
-            // validation: email must be valid
-            var email = txtEmail.Text?.Trim() ?? string.Empty;
-            if (string.IsNullOrWhiteSpace(email) || !email.Contains("@"))
+            using (OpenFileDialog ofd = new OpenFileDialog())
             {
-                lblStatus.Text = "Geçerli bir e-posta girin.";
-                lblStatus.Appearance.ForeColor = Color.FromArgb(200, 40, 40);
-                return;
-            }
-
-            try
-            {
-                byte[] avatar = null;
-                if (pictureBoxAvatar.Image != null)
+                ofd.Filter = "Image files (*.jpg;*.jpeg;*.png)|*.jpg;*.jpeg;*.png";
+                if (ofd.ShowDialog() == DialogResult.OK)
                 {
-                    // Resize and compress to avoid large packets
-                    const int maxWidth = 1024;
-                    const int maxHeight = 1024;
-                    const int targetMaxBytes = 4 * 1024 * 1024; // 4 MB
-
-                    using var src = new Bitmap(pictureBoxAvatar.Image);
-
-                    int newW = src.Width;
-                    int newH = src.Height;
-                    if (newW > maxWidth || newH > maxHeight)
+                    currentImagePath = ofd.FileName;
+                    try
                     {
-                        var ratio = Math.Min((double)maxWidth / newW, (double)maxHeight / newH);
-                        newW = (int)(newW * ratio);
-                        newH = (int)(newH * ratio);
-                    }
-
-                    using var resized = new Bitmap(newW, newH);
-                    using (var g = Graphics.FromImage(resized))
-                    {
-                        g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
-                        g.CompositingQuality = System.Drawing.Drawing2D.CompositingQuality.HighQuality;
-                        g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
-                        g.DrawImage(src, 0, 0, newW, newH);
-                    }
-
-                    // Try different JPEG quality levels until under target size
-                    var jpgEncoder = ImageCodecInfo.GetImageEncoders().FirstOrDefault(c => c.FormatID == ImageFormat.Jpeg.Guid);
-                    if (jpgEncoder != null)
-                    {
-                        long quality = 90;
-                        for (; quality >= 30; quality -= 10)
+                        using (var fs = new FileStream(currentImagePath, FileMode.Open, FileAccess.Read))
                         {
-                            using var ms = new MemoryStream();
-                            var encoderParams = new EncoderParameters(1);
-                            encoderParams.Param[0] = new EncoderParameter(System.Drawing.Imaging.Encoder.Quality, quality);
-                            resized.Save(ms, jpgEncoder, encoderParams);
-                            if (ms.Length <= targetMaxBytes)
-                            {
-                                avatar = ms.ToArray();
-                                break;
-                            }
-                        }
-
-                        // if still null, save with lowest quality tried
-                        if (avatar == null)
-                        {
-                            using var ms = new MemoryStream();
-                            var encoderParams = new EncoderParameters(1);
-                            encoderParams.Param[0] = new EncoderParameter(System.Drawing.Imaging.Encoder.Quality, 30L);
-                            resized.Save(ms, jpgEncoder, encoderParams);
-                            avatar = ms.ToArray();
+                            pictureBoxProfil.Image = Image.FromStream(fs);
                         }
                     }
-                    else
+                    catch (Exception ex)
                     {
-                        // Fallback: PNG
-                        using var ms = new MemoryStream();
-                        resized.Save(ms, ImageFormat.Png);
-                        avatar = ms.ToArray();
-                    }
-
-                    // If still too large, inform user and abort
-                    if (avatar != null && avatar.Length > targetMaxBytes)
-                    {
-                        lblStatus.Text = $"Resim çok büyük ({avatar.Length / 1024} KB).";
-                        lblStatus.Appearance.ForeColor = Color.FromArgb(200, 40, 40);
-                        return;
+                        MessageBox.Show("Resim yüklenirken hata oluştu: " + ex.Message, "Hata", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     }
                 }
+            }
+        }
 
-                var success = await _service.UpdateProfileAsync(currentUserId, txtFirstName.Text.Trim(), txtLastName.Text.Trim(), txtEmail.Text.Trim(), avatar);
-                if (success)
+        private void BtnKaydet_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                int? userId = SessionManager.UserId;
+                if (userId == null || userId == 0)
                 {
-                    SessionManager.FirstName = txtFirstName.Text.Trim();
-                    SessionManager.LastName = txtLastName.Text.Trim();
-                    SessionManager.DisplayName = (SessionManager.FirstName + " " + SessionManager.LastName).Trim();
-                    SessionManager.Email = txtEmail.Text.Trim();
-                    SessionManager.AvatarBytes = avatar;
+                    MessageBox.Show("Kullanıcı bilgisi bulunamadı.", "Hata", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
 
-                    lblStatus.Text = "Profil başarıyla kaydedildi.";
-                    lblStatus.Appearance.ForeColor = Color.FromArgb(16, 185, 129); // green
+                var kullaniciAdi = txtKullaniciAdi.Text.Trim();
+                var sifre = txtSifre.Text;
+                var adSoyad = txtAdSoyad.Text.Trim();
+                var rol = cmbRol.SelectedItem?.ToString() ?? string.Empty;
+                var email = txtEmail.Text.Trim();
 
-                    // small fade-out after 2 seconds
-                    var t = new Timer();
-                    t.Interval = 2000;
-                    t.Tick += (s, ea) =>
-                    {
-                        lblStatus.Text = "";
-                        t.Stop();
-                        t.Dispose();
-                    };
-                    t.Start();
+                using var baglanti = VeritabaniBaglantisi.Baglan();
+                baglanti.Open();
 
-                    this.DialogResult = DialogResult.OK;
-                    this.Close();
+                byte[] imageBytes = null;
+                if (!string.IsNullOrEmpty(currentImagePath) && File.Exists(currentImagePath))
+                {
+                    imageBytes = File.ReadAllBytes(currentImagePath);
+                }
+
+                string sorgu;
+                if (imageBytes != null)
+                {
+                    sorgu = "UPDATE Kullanicilar SET KullaniciAdi=@kullaniciAdi, Sifre=@sifre, AdSoyad=@adSoyad, Rol=@rol, Email=@email, fotograf=@fotograf WHERE KullaniciID=@id";
                 }
                 else
                 {
-                    lblStatus.Text = "Profil kaydedilemedi.";
-                    lblStatus.Appearance.ForeColor = Color.FromArgb(200, 40, 40);
+                    sorgu = "UPDATE Kullanicilar SET KullaniciAdi=@kullaniciAdi, Sifre=@sifre, AdSoyad=@adSoyad, Rol=@rol, Email=@email WHERE KullaniciID=@id";
                 }
+
+                using var cmd = new MySqlCommand(sorgu, baglanti);
+                cmd.Parameters.AddWithValue("@kullaniciAdi", kullaniciAdi);
+                cmd.Parameters.AddWithValue("@sifre", sifre);
+                cmd.Parameters.AddWithValue("@adSoyad", adSoyad);
+                cmd.Parameters.AddWithValue("@rol", rol);
+                cmd.Parameters.AddWithValue("@email", email);
+                cmd.Parameters.AddWithValue("@id", userId.Value);
+
+                if (imageBytes != null)
+                {
+                    cmd.Parameters.AddWithValue("@fotograf", imageBytes);
+                }
+
+                cmd.ExecuteNonQuery();
+
+                // Update session
+                SessionManager.Username = kullaniciAdi;
+                SessionManager.Email = email;
+                SessionManager.DisplayName = adSoyad;
+                SessionManager.Role = rol;
+                if (imageBytes != null) SessionManager.AvatarBytes = imageBytes;
+
+                MessageBox.Show("Profil bilgileri başarıyla güncellendi.", "Başarılı", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                currentImagePath = null;
             }
             catch (Exception ex)
             {
-                lblStatus.Text = "Profil güncellenirken hata: " + ex.Message;
-                lblStatus.Appearance.ForeColor = Color.FromArgb(200, 40, 40);
+                MessageBox.Show("Hata oluştu: " + ex.Message, "Hata", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
-        private void btnUploadAvatar_Click(object sender, EventArgs e)
+        private void BtnIptal_Click(object sender, EventArgs e)
         {
-            using var ofd = new OpenFileDialog();
-            ofd.Filter = "Image files|*.png;*.jpg;*.jpeg;*.bmp";
-            if (ofd.ShowDialog() == DialogResult.OK)
+            try
             {
-                try
-                {
-                    var img = Image.FromFile(ofd.FileName);
-                    pictureBoxAvatar.Image = img;
-                    MakeAvatarCircular();
-                }
-                catch (Exception ex)
-                {
-                    lblStatus.Text = "Resim yüklenemedi: " + ex.Message;
-                    lblStatus.Appearance.ForeColor = Color.FromArgb(200, 40, 40);
-                }
+                this.Hide();
             }
-        }
-
-        private void pictureBoxAvatar_Click(object sender, EventArgs e)
-        {
-
+            catch
+            {
+                this.Close();
+            }
         }
     }
 }
